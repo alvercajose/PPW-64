@@ -9,5 +9,6 @@
     left: 5px;
     width: auto;
     padding: 10px;
-    text-shadow: 8px 8px 5pxx rgba(0,0,0,0.5);
+    background-color: lightsalmon;
+    box-shadow: 8px 8px 5px rgba(0, 0, 0, 0.5);
 }
