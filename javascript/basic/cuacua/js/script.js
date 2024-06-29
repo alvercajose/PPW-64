@@ -1,6 +1,6 @@
 function seleccionar_opcion(opcion) {
-    var opcion_1 = document.getElementById("opcion_01").src="cua1.avif"
-    var opcion_2 = document.getElementById("opcion_02").src="cua2.jpg"
+    var opcion_1 = document.getElementById("opcion_01")
+    var opcion_2 = document.getElementById("opcion_02")
 
     if (opcion == 1) {
         opcion_1.style.zIndex = 2
