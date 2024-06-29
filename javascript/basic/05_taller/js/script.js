@@ -1,0 +1,1 @@
+var div_cajita =document.getElementById("cajita")
