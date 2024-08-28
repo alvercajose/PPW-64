@@ -6,9 +6,9 @@ import { Server as WebsocketServer} from "socket.io"
 const socketIo = require('socket.io');
 
 import sockets from './socket/socket'
-const config = require('./base/config')
+const config = require('./network/config')
 const routes = require('./network/routes')
-const db = require('./base/db')
+const db = require('./network/db')
 
 
 var app = express()
