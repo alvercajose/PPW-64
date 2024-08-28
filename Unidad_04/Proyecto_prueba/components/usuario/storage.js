@@ -1,41 +1,25 @@
+const Usuario = require('./model');
 
-const model = require('./model')
-
-async function insertar_usuario(dato) {
-    const resultado = await new model(dato)
-    return resultado.save()
+async function addUsuario(usuarioData) {
+    const usuario = new Usuario(usuarioData);
+    return await usuario.save();
 }
 
-async function obtener_usuario(dato) {
-     let mi_filtro = {}
-     
-     if (dato.usuario != null) {
-        mi_filtro = { usuario: dato.usuario }
-     }
-
-     const resultado = await model.find( mi_filtro )
-     return resultado
+async function getUsuario(email) {
+    return await Usuario.findOne({ email });
 }
 
-async function actualizar_usuario(dato) {
-    const usuario = await model.findOne( {usuario:dato.usuario} )
-    usuario.nombre = dato.nombre
-    usuario.apellido = dato.apellido
-    usuario.clave = dato.clave
-    usuario.fecha_nacimiento = dato.fecha_nacimiento
-
-    const resultado = usuario.save()
-    return resultado
+async function updateUsuario(email, updateData) {
+    return await Usuario.findOneAndUpdate({ email }, updateData, { new: true });
 }
 
-async function eliminar_usuario(dato) {
-    const resultado = await model.deleteOne( {usuario: dato.usuario} )
-    return resultado
+async function deleteUsuario(email) {
+    return await Usuario.findOneAndDelete({ email });
 }
 
 module.exports = {
-    insertar:insertar_usuario,
-    obtener:obtener_usuario,
-    actualizar:actualizar_usuario,
-    eliminar:eliminar_usuario
-}
+    add: addUsuario,
+    get: getUsuario,
+    update: updateUsuario,
+    delete: deleteUsuario
+};

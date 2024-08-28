@@ -1,22 +1,50 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Batalla Naval Online</title>
-  <!--link rel="stylesheet" href="/css/styles.css"-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <from id="noteForm">
-    <input type="title" type="text">
+    <div id="login-container">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="login-btn">Iniciar Sesión</button>
+        <p>¿No tienes cuenta? <a href="#" id="show-register">Regístrate</a></p>
+    </div>
 
-    <textarea id="descripcion" rows="3"></textarea>
-    <button>Send</button>
-  </from>
-  <div id="game-container"></div>
+    <div id="register-container" style="display:none;">
+        <h2>Registro</h2>
+        <input type="text" id="reg-nombre" placeholder="Nombre" required>
+        <input type="text" id="reg-apellido" placeholder="Apellido" required>
+        <input type="text" id="reg-curso" placeholder="Curso" required>
+        <input type="text" id="reg-paralelo" placeholder="Paralelo" required>
+        <input type="email" id="reg-email" placeholder="Email" required>
+        <input type="date" id="reg-fecha-nacimiento" required>
+        <input type="password" id="reg-clave" placeholder="Contraseña" required>
+        <button id="register-btn">Registrarse</button>
+        <p>Si ya tienes cuenta, click en <a href="#" id="show-login">Login</a></p>
+    </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="main.js"></script>
+    <div id="game-container" style="display:none;">
+        <h2>Battleship</h2>
+        <div id="game-status"></div>
+        <button id="start-game">Buscar Partida</button>
+        <div id="boards-container">
+            <div>
+                <h3>Tu Tablero</h3>
+                <div id="player-board" class="board"></div>
+            </div>
+            <div>
+                <h3>Tablero Oponente</h3>
+                <div id="opponent-board" class="board"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

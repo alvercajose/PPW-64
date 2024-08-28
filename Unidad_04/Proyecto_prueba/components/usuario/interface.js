@@ -1,32 +1,66 @@
-const express = require('express')
+const express = require('express');
+const controller = require('./controller');
+const router = express.Router();
 
-const controller = require('./controller')
-const response = require('../../network/response')
+router.post('/registro', async (req, res) => {
+    try {
+        const usuario = await controller.addUsuario(req.body);
+        res.status(201).json({ message: 'Usuario creado con éxito', usuario });
+    } catch (error) {
+        res.status(400).json({ message: 'Error al crear usuario', error: error.message });
+    }
+});
 
-const routes = express.Router()
+router.post('/login', async (req, res) => {
+    try {
+        const usuario = await controller.autenticarUsuario(req.body.email, req.body.clave);
+        if (usuario) {
+            res.json({ message: 'Login exitoso', usuario });
+        } else {
+            res.status(401).json({ message: 'Credenciales inválidas' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    }
+});
 
-routes.post('/', function(req, res) {
-    controller.insertar_usuario( req.body )
-        .then( (data) => response.success(req, res, data, 201) )
-        .catch( (error) => response.error(req, res, error, 400) )
-})
+router.get('/:email', async (req, res) => {
+    try {
+        const usuario = await controller.getUsuario(req.params.email);
+        if (usuario) {
+            res.json(usuario);
+        } else {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    }
+});
 
-routes.get('/', function(req, res) {
-    controller.obtener_usuario( req.body )
-        .then( (data) => response.success(req, res, data, 201) )
-        .catch( (error) => response.error(req, res, error, 400) )
-})
+router.put('/:email', async (req, res) => {
+    try {
+        const usuario = await controller.updateUsuario(req.params.email, req.body);
+        if (usuario) {
+            res.json({ message: 'Usuario actualizado con éxito', usuario });
+        } else {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: 'Error al actualizar usuario', error: error.message });
+    }
+});
 
-routes.put('/', function(req, res){
-    controller.actualizar_usuario( req.body )
-        .then( (data) => response.success(req, res, data, 201) )
-        .catch( (error) => response.error(req, res, error, 400) )
-})
+router.delete('/:email', async (req, res) => {
+    try {
+        const usuario = await controller.deleteUsuario(req.params.email);
+        if (usuario) {
+            res.json({ message: 'Usuario eliminado con éxito' });
+        } else {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar usuario', error: error.message });
+    }
+});
 
-routes.delete('/', function(req, res){
-    controller.eliminar_usuario( req.body )
-        .then( (data) => response.success(req, res, data, 201) )
-        .catch( (error) => response.error(req, res, error, 400) )
-})
-
-module.exports = routes
+module.exports = router;

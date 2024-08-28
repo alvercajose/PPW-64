@@ -1,55 +1,42 @@
-const storage = require('./storage')
+const storage = require('./storage');
+const bcrypt = require('bcrypt');
 
-function insertar_usuario( dato ) {
-    return new Promise( (resolve, reject) => {
-        if (!dato.usuario || !dato.clave || !dato.nombre || !dato.apellido || !dato.fecha_nacimiento ) {
-            reject( 'Los datos se encuentran incompletos.' )
-        } else {
-            resolve( storage.insertar( dato ) )
-        }
-    } )
+async function addUsuario(usuarioData) {
+    const hashedPassword = await bcrypt.hash(usuarioData.clave, 10);
+    usuarioData.clave = hashedPassword;
+    usuarioData.fecha_registro = new Date();
+    usuarioData.fecha_actualizacion = new Date();
+    return await storage.add(usuarioData);
 }
 
-function obtener_usuario( dato ) {
-    return new Promise( (resolve, reject) => {
-        if (!dato) {
-            reject( 'No existen datos' )
-        } else {
-            resolve( storage.obtener( dato ) )
-        }
-    } )
+async function getUsuario(email) {
+    return await storage.get(email);
 }
 
-function actualizar_usuario(dato) {
-    return new Promise( (resolve, reject) => {
-        if (!dato.usuario || !dato.clave || !dato.nombre || !dato.apellido || !dato.fecha_nacimiento ) {
-            reject( 'Los datos se encuentran incompletos.' )
-        } else {
-            let usuario = {
-                nombre: dato.nombre,
-                apellido: dato.apellido,
-                usuario: dato.usuario,
-                clave: dato.clave,
-                fecha_nacimiento: dato.fecha_nacimiento
-            }
-            resolve( storage.actualizar( usuario ) )
-        }
-    } ) 
+async function updateUsuario(email, updateData) {
+    if (updateData.clave) {
+        updateData.clave = await bcrypt.hash(updateData.clave, 10);
+    }
+    updateData.fecha_actualizacion = new Date();
+    return await storage.update(email, updateData);
 }
 
-function eliminar_usuario(dato) {
-    return new Promise( (resolve, reject) => {
-        if ( !dato.usuario ) {
-            reject( 'Los datos se encuentran incompletos.' )
-        } else {
-            resolve( storage.eliminar( dato ) )
-        }
-    } ) 
+async function deleteUsuario(email) {
+    return await storage.delete(email);
+}
+
+async function autenticarUsuario(email, clave) {
+    const usuario = await storage.get(email);
+    if (usuario && await bcrypt.compare(clave, usuario.clave)) {
+        return usuario;
+    }
+    return null;
 }
 
 module.exports = {
-    insertar_usuario,
-    obtener_usuario,
-    actualizar_usuario,
-    eliminar_usuario
-}
+    addUsuario,
+    getUsuario,
+    updateUsuario,
+    deleteUsuario,
+    autenticarUsuario
+};

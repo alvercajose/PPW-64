@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose')
 const schema = mongoose.Schema
 
@@ -10,9 +11,8 @@ const req_date = {
     type: Date,
     required: true
 }
-
-const uni_string = {
-    type: String,
+const uni_string ={
+    type:String,
     required: true,
     unique: true
 }
