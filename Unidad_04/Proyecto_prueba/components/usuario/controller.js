@@ -25,12 +25,22 @@ async function deleteUsuario(email) {
     return await storage.delete(email);
 }
 
-async function autenticarUsuario(email, clave) {
-    const usuario = await storage.get(email);
-    if (usuario && await bcrypt.compare(clave, usuario.clave)) {
-        return usuario;
+async function login(email, clave) {
+    try {
+        const user = await get(email);
+        if (user && await bcrypt.compare(clave, user.clave)) {
+            return {
+                id: user._id,
+                nombre: user.nombre,
+                email: user.email
+                // Añade aquí otros campos que quieras devolver
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error en login:', error);
+        throw error;
     }
-    return null;
 }
 
 module.exports = {
@@ -38,5 +48,5 @@ module.exports = {
     getUsuario,
     updateUsuario,
     deleteUsuario,
-    autenticarUsuario
+    login,
 };

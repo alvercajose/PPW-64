@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const schema = mongoose.Schema
+const bcrypt = require('bcrypt');
+
 
 const req_string = {
     type: String,
@@ -30,6 +32,8 @@ const usuario_schema = new schema({
 }, {
     timestamps: { createdAt: 'fecha_creacion', updatedAt: 'fecha_actualizacion' }
 })
-
+usuario_schema.methods.comparePassword = async function(candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.clave);
+};
 const model = mongoose.model('usuario', usuario_schema)
 module.exports = model

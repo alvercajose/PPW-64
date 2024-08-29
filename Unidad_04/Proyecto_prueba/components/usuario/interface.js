@@ -13,7 +13,7 @@ router.post('/registro', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const usuario = await controller.autenticarUsuario(req.body.email, req.body.clave);
+        const usuario = await controller.login(req.body.email, req.body.clave);
         if (usuario) {
             res.json({ message: 'Login exitoso', usuario });
         } else {

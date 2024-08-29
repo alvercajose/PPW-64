@@ -1,13 +1,8 @@
-
 const express = require('express')
 const body_parser = require('body-parser')
 const http = require("http")
-import { Server as WebsocketServer} from "socket.io"
-const socketIo = require('socket.io');
+const { Server: WebsocketServer } = require('socket.io');
 
-//import sockets from './network/sockets'
-const sockets = require('./public/socket')
-const usuarioactivo = require('./public/main')
 const userController = require('./components/usuario/controller')
 const config = require('./network/config')
 const routes = require('./network/routes')
@@ -38,6 +33,21 @@ io.on('connection', (socket) => {
         } catch (error) {
             console.error('Error al registrar usuario:', error);
             socket.emit('registerError', { message: 'Error al registrar usuario' });
+        }
+    });
+    socket.on('login', async ({ email, clave }) => {
+        try {
+            // Aquí va la lógica de validación con la base de datos
+            const user = await userController.login(email, clave);
+            if (user) {
+                socket.emit('loginSuccess', user);
+            } else {
+                console.log('Credenciales inválidas para:', email);
+                socket.emit('loginError', 'Credenciales inválidas');
+            }
+        } catch (error) {
+            console.error('Error en login:', error);
+            socket.emit('error', 'Error al iniciar sesión');
         }
     });
 });
