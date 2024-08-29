@@ -22,8 +22,10 @@ app.use( body_parser.urlencoded({extended:false}) )
 app.use('/', express.static('public'))
 
 io.on('connection', (socket) => {
-    console.log('Nuevo cliente conectado');
-
+    console.log('Nuevo cliente conectado, ', socket.id);
+    socket.on('disconnect', () => {
+        console.log('Client desconectado, ', socket.id);
+    });
     socket.on('register', async (userData) => {
         console.log('Datos de registro recibidos:', userData);
         try {
@@ -35,21 +37,36 @@ io.on('connection', (socket) => {
             socket.emit('registerError', { message: 'Error al registrar usuario' });
         }
     });
-    socket.on('login', async ({ email, clave }) => {
+    socket.on('login', async ({ email, password }) => {
         try {
-            // Aquí va la lógica de validación con la base de datos
-            const user = await userController.login(email, clave);
-            if (user) {
-                socket.emit('loginSuccess', user);
+            console.log('Datos de login recibidos en el servidor:', { email, password });
+            const user = await userController.getUsuario(email);
+            if (!user) {
+                socket.emit('loginError', 'Usuario no encontrado');
+                return;
+            } 
+
+            const isPasswordValid = password === user.clave;
+            console.log('Contraseña válida:', isPasswordValid);
+            
+            if (isPasswordValid) {
+                // Contraseña correcta
+                socket.emit('loginSuccess', {
+                    id: user._id,
+                    nombre: user.nombre,
+                    email: user.email,
+                    apellido: user.apellido
+                    // Añade otros campos si es necesario
+                });
             } else {
-                console.log('Credenciales inválidas para:', email);
-                socket.emit('loginError', 'Credenciales inválidas');
+                // Contraseña incorrecta
+                socket.emit('loginError', 'Contraseña incorrecta');
             }
         } catch (error) {
-            console.error('Error en login:', error);
-            socket.emit('error', 'Error al iniciar sesión');
+            console.error('Error en login en el servidor:', error);
+            socket.emit('loginError', 'Error al iniciar sesión');
         }
-    });
+    })
 });
 console.log(`La aplicacion se encuentra arriba en http://localhost:${config.PORT}`)
 

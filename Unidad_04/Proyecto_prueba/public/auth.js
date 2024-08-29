@@ -7,6 +7,7 @@ document.getElementById('login-btn').addEventListener('click', () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     console.log('Intentando iniciar sesion con: ', email);
+    console.log('contraseña ', password);
     socket.emit('login', { email, password });
 });
 
@@ -37,12 +38,13 @@ document.getElementById('show-login').addEventListener('click', () => {
 });
 
 // Socket.IO event handlers for authentication
-socket.on('loginSuccess', (user) => {
+
+socket.on('loginSuccess', (usuario) => {
     loginContainer.style.display = 'none';
     gameContainer.style.display = 'block';
     document.getElementById('game-container').style.display = 'block';
-
-    document.getElementById('game-status').textContent = `Bienvenido, ${user.nombre}!`;
+    console.log('User data received:', usuario);
+    document.getElementById('game-status').textContent = `Bienvenido, ${usuario.nombre}  ${usuario.apellido}!`;
     
     // Here you would call a function to initialize and display your game tables
     initializeGame();
@@ -65,3 +67,4 @@ function initializeGame() {
     console.log('Initializing game...');
     // Add your game table initialization code here
 }
+

@@ -14,7 +14,7 @@ router.post('/registro', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const usuario = await controller.login(req.body.email, req.body.clave);
-        if (usuario) {
+        if (user && clave === user.clave) {
             res.json({ message: 'Login exitoso', usuario });
         } else {
             res.status(401).json({ message: 'Credenciales inválidas' });

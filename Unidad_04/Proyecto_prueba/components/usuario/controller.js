@@ -1,9 +1,6 @@
 const storage = require('./storage');
-const bcrypt = require('bcrypt');
 
 async function addUsuario(usuarioData) {
-    const hashedPassword = await bcrypt.hash(usuarioData.clave, 10);
-    usuarioData.clave = hashedPassword;
     usuarioData.fecha_registro = new Date();
     usuarioData.fecha_actualizacion = new Date();
     return await storage.add(usuarioData);
@@ -15,7 +12,7 @@ async function getUsuario(email) {
 
 async function updateUsuario(email, updateData) {
     if (updateData.clave) {
-        updateData.clave = await bcrypt.hash(updateData.clave, 10);
+        updateData.clave =updateData.clave;
     }
     updateData.fecha_actualizacion = new Date();
     return await storage.update(email, updateData);
@@ -27,14 +24,18 @@ async function deleteUsuario(email) {
 
 async function login(email, clave) {
     try {
-        const user = await get(email);
-        if (user && await bcrypt.compare(clave, user.clave)) {
+        console.log('Intentando iniciar sesión con:', email);
+        const user = await getUsuario(email);
+        console.log('Usuario encontrado:', user);
+        if (user && clave === user.clave.trim) {
             return {
                 id: user._id,
                 nombre: user.nombre,
-                email: user.email
+                email: user.email,
                 // Añade aquí otros campos que quieras devolver
             };
+        }else {
+            console.log('Credenciales inválidas o usuario no encontrado');
         }
         return null;
     } catch (error) {
