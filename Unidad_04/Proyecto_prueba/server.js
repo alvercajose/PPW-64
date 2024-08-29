@@ -7,7 +7,7 @@ const userController = require('./components/usuario/controller')
 const config = require('./network/config')
 const routes = require('./network/routes')
 const db = require('./network/db')
-
+const { registerHandler, loginHandler } = require('./public/socket');
 
 var app = express()
 const server = http.createServer(app);
@@ -23,51 +23,74 @@ app.use('/', express.static('public'))
 
 io.on('connection', (socket) => {
     console.log('Nuevo cliente conectado, ', socket.id);
+    registerHandler(socket);
+    loginHandler(socket);
     socket.on('disconnect', () => {
         console.log('Client desconectado, ', socket.id);
     });
-    socket.on('register', async (userData) => {
-        console.log('Datos de registro recibidos:', userData);
-        try {
-            // Aquí va tu lógica para guardar el usuario en la base de datos
-            const newUser = await userController.addUsuario(userData);
-            socket.emit('registerSuccess', { message: 'Usuario registrado con éxito', user: newUser });
-        } catch (error) {
-            console.error('Error al registrar usuario:', error);
-            socket.emit('registerError', { message: 'Error al registrar usuario' });
+    socket.on('buscarPartida', () => {
+        if (waitingPlayer) {
+            // Emparejar con el jugador en espera
+            const game = {
+                _id: generateGameId(),
+                player1: waitingPlayer.id,
+                player2: socket.id,
+                playerBoardData: createEmptyBoard(),
+                opponentBoardData: createEmptyBoard(),
+                turn: waitingPlayer.id
+            };
+            io.to(waitingPlayer.id).emit('partidaEncontrada', game);
+            io.to(socket.id).emit('partidaEncontrada', game);
+
+            // Guardar el juego en alguna estructura o base de datos
+            waitingPlayer = null; // Reiniciar el jugador en espera
+        } else {
+            waitingPlayer = socket;
+            socket.emit('esperandoJugador');
         }
     });
-    socket.on('login', async ({ email, password }) => {
-        try {
-            console.log('Datos de login recibidos en el servidor:', { email, password });
-            const user = await userController.getUsuario(email);
-            if (!user) {
-                socket.emit('loginError', 'Usuario no encontrado');
-                return;
-            } 
 
-            const isPasswordValid = password === user.clave;
-            console.log('Contraseña válida:', isPasswordValid);
-            
-            if (isPasswordValid) {
-                // Contraseña correcta
-                socket.emit('loginSuccess', {
-                    id: user._id,
-                    nombre: user.nombre,
-                    email: user.email,
-                    apellido: user.apellido
-                    // Añade otros campos si es necesario
-                });
+    socket.on('realizarMovimiento', (data) => {
+        const { juegoId, x, y } = data;
+        // Obtener el juego usando juegoId
+        const juego = getGameById(juegoId); // Implementa esta función
+
+        // Verificar si es el turno del jugador
+        if (socket.id === juego.turn) {
+            const opponentBoard = juego.opponentBoardData;
+            if (opponentBoard[y][x] === 'ship') {
+                opponentBoard[y][x] = 'hit';
             } else {
-                // Contraseña incorrecta
-                socket.emit('loginError', 'Contraseña incorrecta');
+                opponentBoard[y][x] = 'miss';
             }
-        } catch (error) {
-            console.error('Error en login en el servidor:', error);
-            socket.emit('loginError', 'Error al iniciar sesión');
+
+            // Cambiar el turno al otro jugador
+            juego.turn = (socket.id === juego.player1) ? juego.player2 : juego.player1;
+
+            // Emitir la actualización del juego a ambos jugadores
+            io.to(juego.player1).emit('actualizacionJuego', juego);
+            io.to(juego.player2).emit('actualizacionJuego', juego);
         }
-    })
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Jugador desconectado:', socket.id);
+        if (waitingPlayer && waitingPlayer.id === socket.id) {
+            waitingPlayer = null; // Limpiar el jugador en espera si se desconecta
+        }
+    });
 });
+function createEmptyBoard() {
+    return Array(10).fill().map(() => Array(10).fill(''));
+}
+
+function generateGameId() {
+    return Math.random().toString(36).substr(2, 9); // Generar un ID simple para el juego
+}
+
+function getGameById(id) {
+    // Implementa esta función para obtener el juego por ID
+}
 console.log(`La aplicacion se encuentra arriba en http://localhost:${config.PORT}`)
 
 //npm i nodemon -D

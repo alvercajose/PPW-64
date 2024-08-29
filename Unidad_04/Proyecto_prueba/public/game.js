@@ -49,6 +49,23 @@ socket.on('actualizacionJuego', (juego) => {
 function actualizarTableros(juego) {
     // Implementar la lógica para actualizar los tableros
     // basándose en el estado del juego recibido
+    const { playerBoardData, opponentBoardData } = juego;
+
+    // Actualiza el tablero del jugador
+    playerBoard.querySelectorAll('.cell').forEach((cell, index) => {
+        const x = index % 10;
+        const y = Math.floor(index / 10);
+        cell.classList.toggle('hit', playerBoardData[y][x] === 'hit');
+        cell.classList.toggle('miss', playerBoardData[y][x] === 'miss');
+    });
+
+    // Actualiza el tablero del oponente
+    opponentBoard.querySelectorAll('.cell').forEach((cell, index) => {
+        const x = index % 10;
+        const y = Math.floor(index / 10);
+        cell.classList.toggle('hit', opponentBoardData[y][x] === 'hit');
+        cell.classList.toggle('miss', opponentBoardData[y][x] === 'miss');
+    });
 }
 
 // Inicialización del juego

@@ -1,6 +1,7 @@
 const loginContainer = document.getElementById('login-container');
 const registerContainer = document.getElementById('register-container');
 const gameContainer = document.getElementById('game-container');
+const socket = io(); 
 
 // Login function
 document.getElementById('login-btn').addEventListener('click', () => {
