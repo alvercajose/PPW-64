@@ -1,6 +1,5 @@
 
 const usuario = require('../components/usuario/interface')
-
 const juego = require('../components/juego/interface')
 
 

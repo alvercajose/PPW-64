@@ -9,8 +9,8 @@
 <body>
     <div id="login-container">
         <h2>Login</h2>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Contraseña">
         <button id="login-btn">Iniciar Sesión</button>
         <p>¿No tienes cuenta? <a href="#" id="show-register">Regístrate</a></p>
     </div>
@@ -31,7 +31,25 @@
     <div id="game-container" style="display:none;">
         <h2>Battleship</h2>
         <div id="game-status"></div>
-        <button id="start-game">Buscar Partida</button>
+        <div id="game-options">
+            <button id="create-game">Crear Partida</button>
+            <div id="join-game">
+                <input type="text" id="game-code" placeholder="Código de partida">
+                <button id="join-game-btn">Unirse a Partida</button>
+            </div>
+        </div>
+        <div id="ship-placement" style="display:none;">
+            <h3>Coloca tus barcos</h3>
+            <select id="ship-type">
+                <option value="carrier">Portaaviones (5)</option>
+                <option value="battleship">Acorazado (4)</option>
+                <option value="cruiser">Crucero (3)</option>
+                <option value="submarine">Submarino (3)</option>
+                <option value="destroyer">Destructor (2)</option>
+            </select>
+            <button id="rotate-ship">Rotar Barco</button>
+            <button id="place-ship">Colocar Barco</button>
+        </div>
         <div id="boards-container">
             <div>
                 <h3>Tu Tablero</h3>
