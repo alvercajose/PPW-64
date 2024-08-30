@@ -1,120 +1,90 @@
-class BattleshipGame {
-    constructor() {
-        this.partidaId = null;
-        this.jugadorId = null;
-        this.estadoJuego = 'esperando'; // esperando, preparando, jugando, terminado
-        this.setupSocketListeners();
-    }
+// game.js
 
-    setupSocketListeners() {
-        socket.on('partidaCreada', (data) => {
-            this.partidaId = data.partidaId;
-            this.actualizarEstadoJuego('Partida creada. Código: ' + this.partidaId);
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el socket
+    const socket = io();
 
-        socket.on('jugadorUnido', (data) => {
-            this.actualizarEstadoJuego('Jugador unido. Preparando el juego...');
-        });
+    // Estado del juego
+    const gameState = {
+        playerBoard: Array(10).fill().map(() => Array(10).fill(0)),
+        opponentBoard: Array(10).fill().map(() => Array(10).fill(0)),
+        currentShip: null,
+        isVertical: false,
+        gameId: null,
+        isMyTurn: false,
+        searching: false // Variable para controlar la búsqueda de partidas
+    };
 
-        socket.on('iniciarColocacion', () => {
-            this.estadoJuego = 'preparando';
-            this.actualizarEstadoJuego('Coloca tus barcos');
-            this.mostrarInterfazColocacion();
-        });
+    // Configurar los event listeners
+    document.getElementById('create-game').addEventListener('click', createGame);
+    document.getElementById('join-game-btn').addEventListener('click', joinGame);
+    document.getElementById('rotate-ship').addEventListener('click', rotateShip);
+    document.getElementById('place-ship').addEventListener('click', selectShipToPlace);
+    document.getElementById('cancel-search').addEventListener('click', cancelSearch);
 
-        socket.on('partidaIniciada', () => {
-            this.estadoJuego = 'jugando';
-            this.actualizarEstadoJuego('¡La partida ha comenzado!');
-            this.ocultarInterfazColocacion();
-        });
+    function createGame() {
+        if (gameState.searching) return; // No permitir crear una nueva partida si ya se está buscando una
 
-        socket.on('turnoJugador', (esmiTurno) => {
-            if (esmiTurno) {
-                this.actualizarEstadoJuego('Es tu turno');
+        console.log('Intentando crear una partida...');
+        gameState.searching = true;
+        document.getElementById('waiting-message').style.display = 'block';
+        document.getElementById('cancel-search').style.display = 'block'; // Mostrar botón de cancelar búsqueda
+        socket.emit('createGame', (response) => {
+            console.log('Respuesta del servidor:', response);
+            if (response && response.success) {
+                gameState.gameId = response.gameId;
+                updateGameStatus('Esperando a otro jugador. Código de partida: ' + response.gameId);
             } else {
-                this.actualizarEstadoJuego('Turno del oponente');
+                updateGameStatus('Error al crear la partida: ' + (response ? response.message : 'No se recibió respuesta del servidor'));
+                gameState.searching = false; // Restablecer el estado de búsqueda en caso de error
+                document.getElementById('waiting-message').style.display = 'none'; // Ocultar mensaje de espera
+                document.getElementById('cancel-search').style.display = 'none'; // Ocultar botón de cancelar
             }
         });
-
-        socket.on('resultadoDisparo', (data) => {
-            this.actualizarTablero(data.x, data.y, data.resultado);
-        });
-
-        socket.on('finPartida', (data) => {
-            this.estadoJuego = 'terminado';
-            this.actualizarEstadoJuego(data.ganador === this.jugadorId ? '¡Has ganado!' : 'Has perdido');
-        });
     }
 
-    crearPartida(jugadorId) {
-        this.jugadorId = jugadorId;
-        socket.emit('crearPartida', { jugadorId });
+    function cancelSearch() {
+        if (!gameState.searching) return; // Solo permitir cancelar si se está buscando una partida
+
+        console.log('Cancelando búsqueda de partida...');
+        gameState.searching = false;
+        document.getElementById('waiting-message').style.display = 'none';
+        document.getElementById('cancel-search').style.display = 'none'; // Ocultar botón de cancelar
+        socket.emit('cancelSearch', { gameId: gameState.gameId }); // Enviar solicitud al servidor para cancelar la búsqueda
+        updateGameStatus('Búsqueda de partida cancelada.');
     }
 
-    unirseAPartida(jugadorId, codigoPartida) {
-        this.jugadorId = jugadorId;
-        socket.emit('unirseAPartida', { jugadorId, codigoPartida });
+    function updateGameStatus(message) {
+        document.getElementById('game-status').textContent = message;
     }
 
-    colocarBarcos(barcos) {
-        if (this.estadoJuego !== 'preparando') {
-            throw new Error('No es el momento de colocar barcos');
-        }
-        socket.emit('colocarBarcos', { partidaId: this.partidaId, jugadorId: this.jugadorId, barcos });
-    }
+    // Implementa otras funciones aquí...
 
-    realizarDisparo(x, y) {
-        if (this.estadoJuego !== 'jugando') {
-            throw new Error('No es el momento de realizar disparos');
-        }
-        socket.emit('realizarDisparo', { partidaId: this.partidaId, jugadorId: this.jugadorId, x, y });
-    }
-
-    actualizarEstadoJuego(mensaje) {
-        document.getElementById('game-status').textContent = mensaje;
-    }
-
-    mostrarInterfazColocacion() {
-        document.getElementById('ship-placement').style.display = 'block';
-    }
-
-    ocultarInterfazColocacion() {
-        document.getElementById('ship-placement').style.display = 'none';
-    }
-
-    actualizarTablero(x, y, resultado) {
-        // Implementar la lógica para actualizar el tablero en la interfaz
-        console.log(`Disparo en (${x}, ${y}): ${resultado}`);
-    }
-}
-
-// Inicialización y manejo de eventos de la interfaz
-document.addEventListener('DOMContentLoaded', () => {
-    const game = new BattleshipGame();
-
-    document.getElementById('create-game').addEventListener('click', () => {
-        const jugadorId = /* obtener id del jugador autenticado */;
-        game.crearPartida(jugadorId);
+    // Manejar eventos del socket
+    socket.on('connect', () => {
+        console.log('Conectado al servidor Socket.io');
     });
 
-    document.getElementById('join-game-btn').addEventListener('click', () => {
-        const jugadorId = /* obtener id del jugador autenticado */;
-        const codigoPartida = document.getElementById('game-code').value;
-        game.unirseAPartida(jugadorId, codigoPartida);
+    socket.on('error', (error) => {
+        console.error('Error de socket:', error);
     });
 
-    document.getElementById('place-ship').addEventListener('click', () => {
-        const shipType = document.getElementById('ship-type').value;
-        // Lógica para colocar el barco en el tablero
-        // Cuando todos los barcos estén colocados:
-        // game.colocarBarcos(barcos);
+    socket.on('gameStart', () => {
+        console.log('La partida ha comenzado');
+        updateGameStatus('¡La partida ha comenzado!');
+        gameState.isMyTurn = true;
     });
 
-    document.getElementById('opponent-board').addEventListener('click', (e) => {
-        if (game.estadoJuego === 'jugando') {
-            const x = /* calcular x basado en el clic */;
-            const y = /* calcular y basado en el clic */;
-            game.realizarDisparo(x, y);
-        }
+    socket.on('opponentMove', ({ x, y, hit }) => {
+        console.log('Movimiento del oponente:', { x, y, hit });
+        const cell = document.querySelector(`#player-board .cell[data-x="${x}"][data-y="${y}"]`);
+        cell.classList.add(hit ? 'hit' : 'miss');
+        gameState.isMyTurn = true;
+        updateGameStatus('Tu turno');
+    });
+
+    socket.on('gameOver', (winner) => {
+        console.log('Juego terminado. Ganador:', winner);
+        updateGameStatus(winner === socket.id ? '¡Has ganado!' : 'Has perdido.');
     });
 });

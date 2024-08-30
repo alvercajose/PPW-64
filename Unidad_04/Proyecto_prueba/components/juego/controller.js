@@ -1,12 +1,20 @@
 const storage = require('./storage');
 
-async function buscarOCrearPartida(jugadorId) {
+async function crearJuego(jugadorId) {
+    return await storage.crearPartida(jugadorId);
+}
+
+async function buscarJuego(jugadorId) {
     let partida = await storage.buscarPartidaDisponible();
     if (partida) {
         return await storage.unirseAPartida(partida._id, jugadorId);
     } else {
-        return await storage.crearPartida(jugadorId);
+        return { success: false, message: 'No hay partidas disponibles para unirse.' };
     }
+}
+
+async function unirseAPartida(partidaId, jugadorId) {
+    return await storage.unirseAPartida(partidaId, jugadorId);
 }
 
 async function colocarBarcos(partidaId, jugadorId, barcos) {
@@ -23,7 +31,9 @@ async function obtenerEstadoPartida(partidaId) {
 }
 
 module.exports = {
-    buscarOCrearPartida,
+    crearJuego,
+    buscarJuego,
+    unirseAPartida,
     colocarBarcos,
     realizarDisparo,
     obtenerEstadoPartida

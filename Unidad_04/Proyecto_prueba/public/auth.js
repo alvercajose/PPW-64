@@ -47,8 +47,6 @@ socket.on('loginSuccess', (usuario) => {
     console.log('User data received:', usuario);
     document.getElementById('game-status').textContent = `Bienvenido, ${usuario.nombre}  ${usuario.apellido}!`;
     
-    // Here you would call a function to initialize and display your game tables
-    initializeGame();
 });
 
 socket.on('registerSuccess', () => {
@@ -61,11 +59,3 @@ socket.on('error', (message) => {
     console.error('Error: ',message);
     alert(message);
 });
-
-// Function to initialize game tables (you'll need to implement this)
-function initializeGame() {
-    // This function should handle the logic for displaying and populating your game tables
-    console.log('Initializing game...');
-    // Add your game table initialization code here
-}
-
