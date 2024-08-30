@@ -42,11 +42,11 @@ document.getElementById('show-login').addEventListener('click', () => {
 
 socket.on('loginSuccess', (usuario) => {
     loginContainer.style.display = 'none';
-    gameContainer.style.display = 'block';
+    
     document.getElementById('game-container').style.display = 'block';
     console.log('User data received:', usuario);
     document.getElementById('game-status').textContent = `Bienvenido, ${usuario.nombre}  ${usuario.apellido}!`;
-    
+    window.location.href = './menu.html';
 });
 
 socket.on('registerSuccess', () => {

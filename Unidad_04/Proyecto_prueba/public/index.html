@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battleship</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div id="login-container">
@@ -40,33 +40,11 @@
                 <button id="join-game-btn">Unirse a Partida</button>
             </div>
         </div>
-        <div id="ship-placement" style="display:none;">
-            <h3>Coloca tus barcos</h3>
-            <select id="ship-type">
-                <option value="carrier">Portaaviones (5)</option>
-                <option value="battleship">Acorazado (4)</option>
-                <option value="cruiser">Crucero (3)</option>
-                <option value="submarine">Submarino (3)</option>
-                <option value="destroyer">Destructor (2)</option>
-            </select>
-            <button id="rotate-ship">Rotar Barco</button>
-            <button id="place-ship">Colocar Barco</button>
-        </div>
-        <div id="boards-container">
-            <div>
-                <h3>Tu Tablero</h3>
-                <div id="player-board" class="board"></div>
-            </div>
-            <div>
-                <h3>Tablero Oponente</h3>
-                <div id="opponent-board" class="board"></div>
-            </div>
-        </div>
+   
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="socket.js"></script>
-    <script src="auth.js"></script>
-    <script src="game.js"></script>
+    <script src="/js/socket.js"></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>
