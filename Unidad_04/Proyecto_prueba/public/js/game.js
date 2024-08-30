@@ -5,7 +5,7 @@
     });
   
     const redirectToHomePage = () => {
-      w.location = '/';
+      w.location = './menu.html';
     };
   
     // If any of the query-string params was not set => redirect to home-screen

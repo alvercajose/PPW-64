@@ -44,5 +44,4 @@ const loginHandler = (socket) => {
 };
 
 
-
 module.exports = { registerHandler, loginHandler };
